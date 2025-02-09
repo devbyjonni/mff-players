@@ -5,24 +5,27 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm, HT
 from fastapi.openapi.docs import get_swagger_ui_html
 from scraper import scrape_mff_players
 
-app = FastAPI()
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+# 🚀 Secure API Docs
 security = HTTPBasic()
 
+# ✅ Load environment variables before defining routes
 DOCS_USER = os.getenv("DOCS_USER", "admin")
 DOCS_PASS = os.getenv("DOCS_PASS", "securepassword")
 
+
+# ✅ Disable FastAPI's default Swagger UI to enforce security
+app = FastAPI(docs_url=None, redoc_url=None)
+
 @app.get("/docs", include_in_schema=False)
 async def get_docs(credentials: HTTPBasicCredentials = Depends(security)):
-    if credentials.username == DOCS_USER and credentials.password == DOCS_PASS:
-        return get_swagger_ui_html(openapi_url="/openapi.json", title="Secure API Docs")
+    if credentials.username != DOCS_USER or credentials.password != DOCS_PASS:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized",
+            headers={"WWW-Authenticate": "Basic"},
+        )
     
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Unauthorized",
-        headers={"WWW-Authenticate": "Basic"},
-    )
+    return get_swagger_ui_html(openapi_url="/openapi.json", title="Secure API Docs")
 
 @app.get("/players")
 def get_players():
