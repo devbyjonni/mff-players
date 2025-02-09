@@ -10,8 +10,7 @@ app = FastAPI()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 security = HTTPBasic()
 
-# ✅ Secure `/docs` with Basic Authentication
-DOCS_USER = os.getenv("DOCS_USER", "admin")  # Use environment variables
+DOCS_USER = os.getenv("DOCS_USER", "admin")
 DOCS_PASS = os.getenv("DOCS_PASS", "securepassword")
 
 @app.get("/docs", include_in_schema=False)
