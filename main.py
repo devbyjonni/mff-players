@@ -1,10 +1,15 @@
 import uvicorn
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from scraper import scrape_mff_players
 
 app = FastAPI()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+@app.get("/players")
+def get_players():
+    return scrape_mff_players()
 
 @app.get("/")
 def read_root():
