@@ -12,6 +12,12 @@ security = HTTPBasic()
 DOCS_USER = os.getenv("DOCS_USER", "admin")
 DOCS_PASS = os.getenv("DOCS_PASS", "securepassword")
 
+# ✅ Load credentials from Railway environment variables for login
+API_USER = os.getenv("API_USER", "defaultuser")  # Default for local testing
+API_PASS = os.getenv("API_PASS", "defaultpassword")
+
+# ✅ OAuth2 Bearer for authentication
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 # ✅ Disable FastAPI's default Swagger UI to enforce security
 app = FastAPI(docs_url=None, redoc_url=None)
@@ -35,9 +41,10 @@ def get_players():
 def read_root():
     return {"message": "MFF Players API is running!"}
 
+# ✅ Use environment variables for login instead of hardcoded values
 @app.post("/token")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    if form_data.username != "testuser" or form_data.password != "password123":
+    if form_data.username != API_USER or form_data.password != API_PASS:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     
     return {"access_token": form_data.username, "token_type": "bearer"}
